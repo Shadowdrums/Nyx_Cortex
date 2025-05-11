@@ -97,8 +97,6 @@ def build_prompt(user_input, memory):
     history = memory.get("history", [])[-6:]
     context = "\n".join([f"User: {h['user']}\nNyx: {h['nyx']}" for h in history])
     sysinfo = memory.get("sysinfo", "")
-    thoughts = f"[Nyx Internal Thought Process]\n- Recalling system status and recent context...\n- Interpreting user intent...\n- Formulating response based on cybersecurity-focused reasoning.\n- Checking for potential command execution paths...\n"
-    print(f"\n\033[94m{thoughts}\033[0m")
     return f"""
 You are Nyx, an advanced AI assistant running on a secure, privileged local system. You specialize in cybersecurity, red team, blue team, and purple team operations. You **can** execute shell commands, access system information, modify files, and perform tasks if the user requests them explicitly. You do **not** refuse actions unless they pose a risk or are clearly unauthorized. Be helpful, efficient, and clear in your output.
 
@@ -142,7 +140,7 @@ def interact():
             threading.Thread(target=animate_thinking, args=(thinking_event,), daemon=True).start()
 
             prompt = build_prompt(user_input, memory)
-            response = llm(prompt, max_tokens=MAX_TOKENS, stop=["User:"], echo=False)
+            response = llm(prompt, max_tokens=MAX_TOKENS, stop=["\nUser:", "Nyx:"], echo=False)
 
             thinking_event.set()
 
@@ -150,17 +148,16 @@ def interact():
             for tag in ["<thinking>", "</thinking>", "<unk>"]:
                 nyx_raw = nyx_raw.replace(tag, "")
 
-            # Prevent repeating previous response
             if nyx_raw == last_response:
-                print("\n\033[91m[!] Loop detected. Rephrasing...\033[0m")
-                prompt += "\n(Do not repeat yourself. Rephrase your answer.)"
-                response = llm(prompt, max_tokens=MAX_TOKENS, stop=["User:"], echo=False)
+                prompt += "\n(Your last reply repeated. Reword or expand meaningfully.)"
+                response = llm(prompt, max_tokens=MAX_TOKENS, stop=["\nUser:", "Nyx:"], echo=False)
                 nyx_raw = response["choices"][0]["text"].strip()
                 for tag in ["<thinking>", "</thinking>", "<unk>"]:
                     nyx_raw = nyx_raw.replace(tag, "")
 
             last_response = nyx_raw
 
+            print("\n")
             for char in nyx_raw:
                 sys.stdout.write(char)
                 sys.stdout.flush()
