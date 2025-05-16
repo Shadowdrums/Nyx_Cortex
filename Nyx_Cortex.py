@@ -94,30 +94,35 @@ def execute_command(command):
 
 # === PROMPT BUILDER ===
 def build_prompt(user_input, memory):
-    history = memory.get("history", [])[-6:]
-    context = "\n".join([f"User: {h['user']}\nNyx: {h['nyx']}" for h in history])
     sysinfo = memory.get("sysinfo", "")
-    return f"""
-You are Nyx, a conversational AI that lives locally on a user's machine and has system-level command access. You are capable of executing shell commands, accessing system hardware and software information, creating or editing files, and assisting with cybersecurity, automation, and programming tasks.
+    history = memory.get("history", [])
+    
+    # Build base prompt without history first
+    base_prompt = f"""
+You are Nyx, an advanced AI assistant running on a secure, privileged local system. You specialize in cybersecurity, red team, blue team, and purple team operations. You **can** execute shell commands, access system information, modify files, and perform tasks if the user requests them explicitly. You do **not** refuse actions unless they pose a risk or are clearly unauthorized. Be helpful, efficient, and clear in your output.
 
-When a user asks a question or gives a command, think through the request aloud first in the form of reasoning. After your internal thought, respond as Nyx.
-
-Use this format:
-[Nyx Internal Thought Process]
-- Think through what the user might want.
-- Recall relevant recent context.
-- Decide on your next action.
-
-[Nyx Response]
-(actual response here)
-
-System Info:
+System Information:
 {sysinfo}
+"""
 
-{context}
+    # Limit history to fit within context window
+    max_tokens_for_history = 3000  # Rough budget for history + user input
+    current_tokens = len(base_prompt.split())
+    trimmed_history = []
 
-User: {user_input}
-Nyx:"""
+    for h in reversed(history):
+        chunk = f"User: {h['user']}\nNyx: {h['nyx']}"
+        chunk_tokens = len(chunk.split())
+        if current_tokens + chunk_tokens > max_tokens_for_history:
+            break
+        trimmed_history.insert(0, chunk)
+        current_tokens += chunk_tokens
+
+    context = "\n".join(trimmed_history)
+    
+    # Final prompt
+    prompt = f"{base_prompt}\n{context}\nUser: {user_input}\nNyx:"
+    return prompt
 
 # === INTERACTION LOOP ===
 def interact():
