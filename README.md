@@ -99,3 +99,4 @@ ShadowDrums and ShadowTEAM members will not be held liable for any misuse of thi
 - Qwen3 8B model
 - Built with love for real operators. Stay sharp. 🛡️
 - Shadowdrums
+- DJ Stomp
