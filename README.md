@@ -4,6 +4,12 @@
 Nyx is an advanced, terminal-based AI assistant designed for ethical hacking, cybersecurity operations, system administration, and task automation. Powered by `llama.cpp` and running a local model (`Nyx_Brain.gguf`), Nyx is fully GPU-accelerated, command-capable, and context-aware.
 
 ---
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![GPU Required](https://img.shields.io/badge/GPU-NVIDIA_Required-green)
+![License](https://img.shields.io/badge/license-MIT-brightgreen)
+![Model](https://img.shields.io/badge/model-GGUF_Compatible-yellow)
+![Status](https://img.shields.io/badge/status-Offline_AI-orange)
+
 
 ## 🔧 Features
 
